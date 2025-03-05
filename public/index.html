@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fall Detection App</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- update the version number as needed -->
+  <script defer src="/__/firebase/11.4.0/firebase-app-compat.js"></script>
+  <!-- include only the Firebase features as you need -->
+  <script defer src="/__/firebase/11.4.0/firebase-auth-compat.js"></script>
+  <script defer src="/__/firebase/11.4.0/firebase-database-compat.js"></script>
+  <script defer src="/__/firebase/11.4.0/firebase-firestore-compat.js"></script>
+  <script defer src="/__/firebase/11.4.0/firebase-functions-compat.js"></script>
+  <script defer src="/__/firebase/11.4.0/firebase-messaging-compat.js"></script>
+  <script defer src="/__/firebase/11.4.0/firebase-storage-compat.js"></script>
+  <script defer src="/__/firebase/11.4.0/firebase-analytics-compat.js"></script>
+  <script defer src="/__/firebase/11.4.0/firebase-remote-config-compat.js"></script>
+  <script defer src="/__/firebase/11.4.0/firebase-performance-compat.js"></script>
+  <!-- 
+      initialize the SDK after all desired features are loaded, set useEmulator to false
+      to avoid connecting the SDK to running emulators.
+    -->
+  <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+</head>
+
+<body>
+  <div id="app">
+    <!-- Navigation -->
+    <nav>
+      <button id="homeNav">Home</button>
+      <button id="contactsNav">Emergency Contacts</button>
+      <button id="settingsNav">Settings</button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div id="appContent">
+      <!-- Home View -->
+      <div id="homeView" class="view">
+        <h1>Fall Detection</h1>
+        <p>Monitoring is active</p>
+      </div>
+
+      <!-- Inside the appContent div -->
+      <div id="historyView" class="view" style="display:none;">
+        <h1>Fall Detection History</h1>
+
+        <ul id="fallHistoryList" class="fall-history-list">
+          <!-- Fall logs will be dynamically populated here -->
+        </ul>
+
+        <button id="clearHistoryBtn" class="btn btn-red">Clear History</button>
+
+        <div id="fallHistoryNotification" class="notification"></div>
+      </div>
+
+      <!-- Emergency Contacts View -->
+      <div id="contactsView" class="view" style="display: none">
+        <h1>Emergency Contacts</h1>
+        <form id="emergencyContactForm">
+          <div class="form-group">
+            <label for="contactName">Contact Name</label>
+            <input type="text" id="contactName" name="contactName" required />
+          </div>
+          <div class="form-group">
+            <label for="contactPhone">Phone Number</label>
+            <input type="tel" id="contactPhone" name="contactPhone" required />
+          </div>
+          <div class="form-group">
+            <label for="contactRelation">Relationship</label>
+            <input type="text" id="contactRelation" name="contactRelation" />
+          </div>
+          <button type="submit" class="btn">Add Emergency Contact</button>
+        </form>
+
+        <div id="emergencyContactList">
+          <h2>Saved Contacts</h2>
+          <ul id="contactsList"></ul>
+        </div>
+      </div>
+
+      <!-- Settings View -->
+      <div id="settingsView" class="view" style="display:none;">
+        <h1>App Settings</h1>
+        <form id="appSettingsForm">
+          <div class="form-group">
+            <label for="fallSensitivity">Fall Detection Sensitivity</label>
+            <input type="range" id="fallSensitivity" min="0" max="100" value="50">
+            <span id="sensitivityValue">50</span>
+          </div>
+
+          <div class="form-group">
+            <input type="checkbox" id="enableVibration" checked>
+            <label for="enableVibration">Enable Vibration Alarm</label>
+          </div>
+
+          <div class="form-group">
+            <input type="checkbox" id="enableSound" checked>
+            <label for="enableSound">Enable Sound Alarm</label>
+          </div>
+
+          <button type="submit" class="btn">Save Settings</button>
+        </form>
+
+        <div id="settingsNotification" class="notification"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .then((registration) => {
+            console.log("Service Worker registered successfully");
+          })
+          .catch((error) => {
+            console.log("Service Worker registration failed:", error);
+          });
+      });
+    }
+  </script>
+
+  <!-- Main Application Script -->
+  <script type="module" src="/js/app.js"></script>
+</body>
+
+</html>
