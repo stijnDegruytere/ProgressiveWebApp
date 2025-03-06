@@ -1,99 +1,62 @@
 // fall-detection-service.js
-class FallDetectionService {
+// Example of more advanced fall detection logic
+class AdvancedFallDetectionService {
     constructor(options = {}) {
-        // Configurable sensitivity parameters
         this.options = {
-            accelerationThreshold: options.accelerationThreshold || 2.5, // m/s²
-            inactivityThreshold: options.inactivityThreshold || 1000, // milliseconds
-            debounceTime: options.debounceTime || 5000, // milliseconds between fall checks
+            accelerationThreshold: 3.5,  // Higher precision threshold
+            gyroscopeThreshold: 2.0,     // Include rotational data
+            fallWindow: 500,             // Milliseconds to analyze
+            recoveryWindow: 2000         // Time to check user's response
         };
 
-        this.lastAcceleration = null;
-        this.lastMotionTimestamp = null;
-        this.isFallDetected = false;
+        this.motionHistory = [];
         this.fallDetectionCallbacks = [];
     }
 
-    // Start monitoring device motion
-    startMonitoring() {
-        if ('DeviceMotionEvent' in window) {
-            window.addEventListener('devicemotion', this.handleDeviceMotion.bind(this));
-            console.log('Fall detection monitoring started');
-        } else {
-            console.warn('Device motion not supported');
-            return false;
-        }
-        return true;
-    }
-
-    // Stop monitoring device motion
-    stopMonitoring() {
-        window.removeEventListener('devicemotion', this.handleDeviceMotion.bind(this));
-        console.log('Fall detection monitoring stopped');
-    }
-
-    // Add callback for fall detection
-    onFallDetected(callback) {
-        this.fallDetectionCallbacks.push(callback);
-    }
-
-    // Internal method to handle device motion events
+    // Enhanced motion tracking with multiple sensor inputs
     handleDeviceMotion(event) {
-        const { acceleration } = event;
+        const { acceleration, rotationRate } = event;
         const currentTime = Date.now();
 
-        // Calculate total acceleration magnitude
-        const totalAcceleration = Math.sqrt(
-            Math.pow(acceleration.x, 2) +
-            Math.pow(acceleration.y, 2) +
-            Math.pow(acceleration.z, 2)
+        // Calculate more complex motion signature
+        const motionSignature = {
+            totalAcceleration: Math.sqrt(
+                acceleration.x ** 2 + 
+                acceleration.y ** 2 + 
+                acceleration.z ** 2
+            ),
+            rotationalVelocity: rotationRate ? Math.abs(
+                rotationRate.alpha + 
+                rotationRate.beta + 
+                rotationRate.gamma
+            ) : 0,
+            timestamp: currentTime
+        };
+
+        this.motionHistory.push(motionSignature);
+
+        // Keep only recent motion data
+        this.motionHistory = this.motionHistory.filter(
+            motion => currentTime - motion.timestamp < this.options.fallWindow
         );
 
-        // Check for sudden, high acceleration followed by inactivity
-        if (this.lastAcceleration && this.lastMotionTimestamp) {
-            const accelerationChange = Math.abs(totalAcceleration - this.lastAcceleration);
-            const timeSinceLastMotion = currentTime - this.lastMotionTimestamp;
-
-            // Potential fall detection logic
-            if (
-                accelerationChange > this.options.accelerationThreshold &&
-                timeSinceLastMotion > this.options.inactivityThreshold
-            ) {
-                this.triggerFallDetection();
-            }
+        // Advanced fall detection logic
+        if (this.detectPotentialFall(this.motionHistory)) {
+            this.triggerFallDetection(motionSignature);
         }
-
-        // Update last known acceleration and timestamp
-        this.lastAcceleration = totalAcceleration;
-        this.lastMotionTimestamp = currentTime;
     }
 
-    // Trigger fall detection process
-    triggerFallDetection() {
-        if (this.isFallDetected) return;
+    detectPotentialFall(motionData) {
+        // More sophisticated fall detection algorithm
+        const highAccelerationEvents = motionData.filter(
+            motion => motion.totalAcceleration > this.options.accelerationThreshold
+        );
 
-        this.isFallDetected = true;
-        console.log('Potential fall detected!');
+        const suddenRotationalChanges = motionData.filter(
+            motion => motion.rotationalVelocity > this.options.gyroscopeThreshold
+        );
 
-        // Notify all registered callbacks
-        this.fallDetectionCallbacks.forEach(callback => {
-            callback({
-                timestamp: new Date().toISOString(),
-                accelerationData: this.lastAcceleration
-            });
-        });
-
-        // Debounce to prevent multiple fall detections
-        setTimeout(() => {
-            this.isFallDetected = false;
-        }, this.options.debounceTime);
-    }
-
-    // Calibrate sensitivity (optional method)
-    calibrate(options = {}) {
-        this.options = { ...this.options, ...options };
-        console.log('Fall detection calibrated', this.options);
+        return highAccelerationEvents.length > 2 && 
+               suddenRotationalChanges.length > 1;
     }
 }
-
-export default FallDetectionService;

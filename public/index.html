@@ -43,8 +43,6 @@
         <h1>Fall Detection</h1>
         <p>Monitoring is active</p>
       </div>
-
-      <!-- Inside the appContent div -->
       <div id="historyView" class="view" style="display:none;">
         <h1>Fall Detection History</h1>
 
@@ -81,6 +79,20 @@
           <ul id="contactsList"></ul>
         </div>
       </div>
+
+      <div id="locationPermissionModal" class="modal">
+        <div class="modal-content">
+            <h2>Location Access Required</h2>
+            <p>To provide accurate emergency support, this app needs access to your location.</p>
+            <div class="modal-buttons">
+                <button id="allowLocationBtn" class="btn btn-green">Allow Location Access</button>
+                <button id="denyLocationBtn" class="btn btn-red">Deny</button>
+            </div>
+            <p class="location-warning">
+                Without location access, emergency contacts may not be able to locate you in case of a fall.
+            </p>
+        </div>
+    </div>
 
       <!-- Settings View -->
       <div id="settingsView" class="view" style="display:none;">

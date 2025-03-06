@@ -104,10 +104,20 @@ class IndexedDBService {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['fallLogs'], 'readwrite');
             const store = transaction.objectStore('fallLogs');
-            const request = store.add({
+            
+            // Enhanced fall log with location details
+            const enhancedFallLog = {
                 ...fallData,
-                timestamp: new Date().toISOString()
-            });
+                timestamp: new Date().toISOString(),
+                location: fallData.location ? {
+                    latitude: fallData.location.latitude,
+                    longitude: fallData.location.longitude,
+                    accuracy: fallData.location.accuracy,
+                    mapLink: fallData.location.mapLink
+                } : null
+            };
+
+            const request = store.add(enhancedFallLog);
 
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);

@@ -168,3 +168,10 @@ body {
     color: #f44336;
     font-weight: bold;
 }
+
+.location-warning {
+    color: #f44336;
+    font-size: 0.9em;
+    margin-top: 15px;
+    text-align: center;
+}
